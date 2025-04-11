@@ -1,0 +1,68 @@
+version: '3.8' # Use a slightly more modern version specifier
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Avoid overriding node_modules in container
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_API_URL=http://localhost:4007/api # Use host-exposed URL for browser access
+      - WATCHPACK_POLLING=true # For Docker volume hot-reloading
+      - CHOKIDAR_USEPOLLING=true # Alternative polling for create-react-app
+    # command: npm start # Default command from Dockerfile is used
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "4007:4000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy # Wait for DB to be healthy
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=app_user # Use dedicated application user
+      - DB_PASSWORD=app_password # Use dedicated application password
+      - DB_NAME=schedule_db
+      - NODE_ENV=development
+      - PORT=4000
+    command: npm run dev # Use dev script for hot-reloading with nodemon
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000"] # Basic healthcheck
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  db:
+    image: mariadb:10.6 # Use a specific stable version
+    # container_name: schedule_db_container # Optional: give container a specific name
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mariadb_data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=0633 # Keep root password (or change if desired)
+      - MYSQL_DATABASE=schedule_db
+      # Add dedicated application user
+      - MYSQL_USER=app_user 
+      - MYSQL_PASSWORD=app_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root"] # Removed password arg
+    restart: unless-stopped # Better restart policy than always
+
+volumes:
+  mariadb_data:
+    driver: local # Explicitly define driver 
