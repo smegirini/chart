@@ -6,7 +6,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "8080:3000" # 호스트 포트를 8080으로 변경 (Windows 예약 포트 회피)
+      - "8081:3000" # 호스트 포트를 8081로 변경 (포트 충돌 회피)
     volumes:
       - ./frontend:/app
       - /app/node_modules # Avoid overriding node_modules in container

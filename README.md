@@ -202,13 +202,13 @@ docker compose up --build -d
 
 모든 컨테이너가 정상적으로 시작되면 (로그 확인: `docker compose logs -f`), 웹 브라우저를 통해 애플리케이션에 접속할 수 있습니다.
 
-*   서버의 **공개 IP 주소** 또는 **도메인 이름**과 함께 **3000번 포트**를 사용합니다.
-    *   예: `http://<서버_IP_주소>:3000`
-    *   예: `http://your-domain.com:3000`
+*   서버의 **공개 IP 주소** 또는 **도메인 이름**과 함께 **8081번 포트**를 사용합니다.
+    *   예: `http://<서버_IP_주소>:8081`
+    *   예: `http://your-domain.com:8081`
 
-*   방화벽 설정: Ubuntu 서버의 방화벽(예: ufw)에서 3000번 포트에 대한 인바운드 연결을 허용해야 할 수 있습니다.
+*   방화벽 설정: Ubuntu 서버의 방화벽(예: ufw)에서 8081번 포트에 대한 인바운드 연결을 허용해야 할 수 있습니다.
     ```bash
-    sudo ufw allow 3000/tcp
+    sudo ufw allow 8081/tcp
     sudo ufw reload
     ```
 
@@ -224,4 +224,36 @@ docker compose down
 
 ```bash
 docker compose down -v
-``` 
+```
+
+### 문제 해결 (Troubleshooting)
+
+Ubuntu 서버에서 `docker compose up` 실행 시 문제가 발생하는 경우 다음 사항을 확인해 보세요.
+
+*   **포트 충돌 (Port Conflict):**
+    *   **오류 예시:** `Error starting userland proxy: listen tcp4 0.0.0.0:3000: bind: address already in use` (또는 3306 등 다른 포트 번호)
+    *   **원인:** `docker-compose.yml`에 정의된 호스트 포트(예: 8080, 4007, 3307 등)가 이미 우분투 서버에서 다른 프로세스에 의해 사용 중이거나, Windows 예약 포트 범위에 포함된 경우 발생할 수 있습니다.
+    *   **해결 방법 1:** 해당 포트를 사용 중인 프로세스를 확인하고 중지합니다. (예: `sudo ss -tulnp | grep ':<포트번호>'` 또는 `sudo netstat -tulnp | grep ':<포트번호>'` 로 확인 후 `sudo systemctl stop <서비스명>` 으로 중지)
+    *   **해결 방법 2:** `docker-compose.yml` 파일을 열어 충돌이 발생하는 서비스(예: `frontend`, `backend`, `db`)의 `ports` 설정을 다른 사용 가능한 호스트 포트 번호로 변경합니다. (예: `"8081:3000"`, `"4008:4000"`, `"3308:3306"`)
+*   **`docker compose` 명령어 오류:**
+    *   **오류 예시:** `unknown flag: --build` 또는 `unknown shorthand flag: 'd' in -d` 또는 `docker: 'compose' is not a docker command.`
+    *   **원인:** 최신 Docker 환경에서는 하이픈 없는 `docker compose` (V2) 명령어를 사용합니다. 이 명령어가 인식되지 않는다면 Docker Compose V2 플러그인(`docker-compose-plugin`)이 제대로 설치되지 않았거나 활성화되지 않았을 수 있습니다.
+    *   **해결 방법:**
+        1.  Docker 공식 저장소가 올바르게 설정되어 있는지 확인하고 패키지 목록을 업데이트합니다.
+            ```bash
+            # 저장소 설정 (이미 했다면 생략 가능)
+            sudo mkdir -p /etc/apt/keyrings
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            echo \
+              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+              $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+            # 패키지 목록 업데이트
+            sudo apt-get update
+            ```
+        2.  Docker Compose V2 플러그인을 설치하거나 재설치합니다.
+            ```bash
+            sudo apt-get install docker-compose-plugin -y
+            ```
+        3.  이제 `docker compose up --detach` (또는 필요 시 `docker compose build` 후 `docker compose up --detach`) 명령어를 사용하여 애플리케이션을 시작합니다.
+
+## About 
