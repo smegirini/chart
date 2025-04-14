@@ -13,7 +13,7 @@ services:
     depends_on:
       - backend
     environment:
-      - REACT_APP_API_URL=http://192.168.0.26:4007/api # 백엔드 서버 IP와 포트로 명시적 지정
+      - REACT_APP_API_URL=http://118.42.80.103:4007/api # 공인 IP와 외부 백엔드 포트로 변경
       - WATCHPACK_POLLING=true # For Docker volume hot-reloading
       - CHOKIDAR_USEPOLLING=true # Alternative polling for create-react-app
     # command: npm start # Default command from Dockerfile is used
