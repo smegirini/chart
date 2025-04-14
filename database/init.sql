@@ -37,16 +37,25 @@ CREATE TABLE task_statuses (
 -- 작업 테이블
 CREATE TABLE tasks (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(200) NOT NULL,
+  name VARCHAR(255) NOT NULL,
   category_id INT,
   process_type_id INT,
   stage_id INT,
-  status_id INT DEFAULT 1, -- Default to '미진행' status ID
-  start_date DATE NOT NULL, -- Make start_date mandatory
-  end_date DATE NOT NULL,   -- Make end_date mandatory
-  actual_start_date DATE NULL, -- Allow null
-  actual_end_date DATE NULL,   -- Allow null
-  progress FLOAT DEFAULT 0, -- Range 0-100
+  status_id INT,
+  start_date DATE,
+  end_date DATE,
+  progress INT DEFAULT 0,
+  actual_start_date DATE NULL,
+  actual_end_date DATE NULL,
+  spec VARCHAR(255) NULL,              -- 상세 사양
+  vendor VARCHAR(100) NULL,             -- 공급 업체
+  po_number VARCHAR(100) NULL,          -- PO 번호
+  po_date DATE NULL,                    -- PO 날짜
+  expected_delivery_date DATE NULL,   -- 납품 예정일
+  actual_delivery_date DATE NULL,     -- 실제 납품일
+  installation_start_date DATE NULL,  -- 설치 시작 예정일
+  installation_end_date DATE NULL,    -- 설치 종료 예정일
+  notes TEXT NULL,                      -- 비고
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_task_name (name), -- Add index for searching by name

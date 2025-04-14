@@ -119,4 +119,109 @@ docker-compose down -v
 *   알림 시스템 (기한 임박, 지연 등)
 *   PDF/Excel 내보내기 기능
 *   다국어 지원
-*   모바일 반응형 UI 개선 
+*   모바일 반응형 UI 개선
+
+## Ubuntu 서버에서 실행하기
+
+Ubuntu 서버 환경에서 이 애플리케이션을 실행하려면 다음 단계를 따르십시오.
+
+### 1. Docker 설치
+
+먼저 Ubuntu 서버에 Docker Engine을 설치해야 합니다. 최신 버전의 Docker를 설치하는 것이 좋습니다.
+
+```bash
+# 시스템 패키지 목록 업데이트
+sudo apt-get update
+
+# 필수 패키지 설치 (HTTPS를 통해 저장소 사용 허용)
+sudo apt-get install \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release -y
+
+# Docker 공식 GPG 키 추가
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+# Docker 저장소 설정
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# 패키지 목록 다시 업데이트 (Docker 저장소 포함)
+sudo apt-get update
+
+# 최신 버전 Docker Engine, CLI, containerd 설치
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+
+# Docker 서비스 시작 및 활성화
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# 현재 사용자를 docker 그룹에 추가 (sudo 없이 docker 명령어 사용 가능하게 함)
+# 이 명령 실행 후 로그아웃했다가 다시 로그인해야 적용됩니다.
+sudo usermod -aG docker $USER
+
+# Docker 설치 확인
+docker --version
+```
+
+*참고: 위 설치 방법은 Docker 공식 문서를 기반으로 합니다. 설치 중 문제가 발생하면 [Docker 공식 Ubuntu 설치 가이드](https://docs.docker.com/engine/install/ubuntu/)를 참조하십시오.*
+
+### 2. Docker Compose 확인
+
+최신 Docker 설치 방식에서는 Docker Compose가 플러그인 형태로 함께 설치됩니다. 다음 명령어로 설치 여부 및 버전을 확인합니다.
+
+```bash
+docker compose version
+```
+
+만약 설치되지 않았거나 구버전이라면, [Docker Compose 공식 설치 가이드](https://docs.docker.com/compose/install/)를 참조하여 설치 또는 업데이트하십시오.
+
+### 3. 프로젝트 클론
+
+이 GitHub 저장소를 Ubuntu 서버에 클론합니다.
+
+```bash
+git clone https://github.com/smegirini/chart.git
+cd chart
+```
+
+### 4. 애플리케이션 실행
+
+프로젝트 디렉토리(`chart`) 내에서 다음 명령어를 실행하여 Docker 이미지를 빌드하고 백그라운드에서 컨테이너를 시작합니다 (`-d` 플래그 사용).
+
+```bash
+docker compose up --build -d
+```
+
+*참고: `docker-compose` (하이픈 사용) 대신 `docker compose` (띄어쓰기 사용) 명령어를 사용하는 것이 최신 방식입니다.*
+
+### 5. 애플리케이션 접속
+
+모든 컨테이너가 정상적으로 시작되면 (로그 확인: `docker compose logs -f`), 웹 브라우저를 통해 애플리케이션에 접속할 수 있습니다.
+
+*   서버의 **공개 IP 주소** 또는 **도메인 이름**과 함께 **3000번 포트**를 사용합니다.
+    *   예: `http://<서버_IP_주소>:3000`
+    *   예: `http://your-domain.com:3000`
+
+*   방화벽 설정: Ubuntu 서버의 방화벽(예: ufw)에서 3000번 포트에 대한 인바운드 연결을 허용해야 할 수 있습니다.
+    ```bash
+    sudo ufw allow 3000/tcp
+    sudo ufw reload
+    ```
+
+### 6. 애플리케이션 중지
+
+백그라운드에서 실행 중인 애플리케이션 컨테이너를 중지하려면 프로젝트 디렉토리에서 다음 명령어를 실행합니다.
+
+```bash
+docker compose down
+```
+
+데이터베이스 데이터를 포함하여 모든 컨테이너와 볼륨을 완전히 삭제하려면 다음 명령어를 사용합니다 (주의: 데이터 영구 삭제):
+
+```bash
+docker compose down -v
+``` 

@@ -1,0 +1,5 @@
+name,category_name,process_type_name,stage_name,status_name,start_date,end_date,progress,spec,vendor,po_number,po_date,expected_delivery_date,actual_delivery_date,installation_start_date,installation_end_date,actual_start_date,actual_end_date,notes
+"설비 A 제어판넬 제작","Mixing","Installation works","계획","미진행","2024-10-01","2024-10-15",0,"Control Panel Spec v1.2","Vendor A","PO-2024-001","2024-09-01","2024-09-25",,"2024-10-01","2024-10-15",,,"제작 관련 특이사항 없음"
+"텐션 컨트롤러 설치","Calender","Calender","설치","진행중","2024-11-01","2024-11-15",30,"Tension Controller TC-X1","Vendor B","PO-2024-002","2024-09-10","2024-10-15","2024-10-16","2024-11-01","2024-11-15","2024-11-02",,"설치 공간 협소, 주의 필요"
+"다운스트림 제어판넬 시운전","Extrusion","Downstream line","시운전","완료","2024-12-01","2024-12-10",100,"Downstream CP Spec","Vendor C",,,"2024-11-20",,"2024-11-25","2024-11-30","2024-12-01","2024-12-09","성능 테스트 완료"
+"프로파일 스캐너 준비","Extrusion","Extruder line","계획","대기","2025-01-10","2025-01-20",0,"Scanner Spec XYZ","Vendor A",,,,,,,,,,"자재 입고 대기중"
