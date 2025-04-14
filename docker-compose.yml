@@ -49,7 +49,7 @@ services:
     image: mariadb:10.6 # Use a specific stable version
     # container_name: schedule_db_container # Optional: give container a specific name
     ports:
-      - "3306:3306"
+      - "3307:3306" # 호스트 포트를 3307로 변경 (기존 DB와 충돌 회피)
     volumes:
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
       - mariadb_data:/var/lib/mysql
